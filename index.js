@@ -1,1 +1,1 @@
-Vue.component('jb-v-filepond', require('./JbFilePond.vue').default);
+Vue.component('jb-filepond', require('./JbFilePond.vue').default);
