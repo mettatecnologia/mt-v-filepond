@@ -8,7 +8,7 @@
         :allow-multiple="multiple || maxFiles>1"
         :max-files="maxFiles"
         :max-parallel-uploads="maxParallelUploads"
-        
+
         :server="server"
         :files="files"
         :instant-upload="instantUpload"
@@ -29,13 +29,10 @@
 
         :allow-image-preview="allowImagePreview"
         imagePreviewMaxHeight="128"
-        
-
-        @init="init" 
-        @updatefiles="arquivoAtualizado"
-        @removefile="removerArquivoServidor"
 
         :include-styling="false"
+
+        @init="init"
 
     />
 
@@ -83,17 +80,16 @@ export default {
 
         urlBase:{type:String, default:'/'},
         url:{type:String, default:'arquivos'},
-
-        removeConfirm:{type:Function, default:v=>(v)},
+        ativarHttp:{type:Boolean, default:true},
     },
     data: function() {
-        return { 
+        return {
             vModel:{},
             url_base: this.urlBase,
             url_data: this.url,
-            server: {  
+            server: {
                 process:(fieldName, file, metadata, load, error, progress, abort) => {
-                    
+
                     // fieldName is the name of the input field and file is the actual file object to send
                     const formData = Object.assign(new FormData(), this.value);
                     formData.append(fieldName, file, file.name);
@@ -107,7 +103,7 @@ export default {
                     request.upload.onprogress = (e) => {
                         progress(e.lengthComputable, e.loaded, e.total);
                     };
-                                        
+
                     // Should call the load method when done and pass the returned server file id
                     // this server file id is then used later on when reverting or restoring a file
                     // so your server knows which file to return without exposing that info to the client
@@ -115,7 +111,7 @@ export default {
                     request.onload = () => {
                         let response = JSON.parse(request.response)
                         let temErro = response.hasOwnProperty('erro') ? response.erro : false
-                        
+
                         if (request.status >= 200 && request.status < 300) {
                             // the load method accepts either a string (id) or an object
 
@@ -137,7 +133,7 @@ export default {
                     };
 
                     request.send(formData);
-                    
+
                     // Should expose an abort method so the request can be cancelled
                     return {
                         abort: () => {
@@ -180,7 +176,7 @@ export default {
                     };
                 },
                 revert: (response, load, error) => {
-                    
+
                     if(typeof response=='string'){
                         response = JSON.parse(response)
                     }
@@ -201,19 +197,19 @@ export default {
 
                         if(obj.response.erro){
                             load();
-                            return; 
+                            return;
                         }
                     }
 
                     const formData = Object.assign(new FormData(), this.value);
                     formData.append('nome', response.dados.nomeinterno);
                     formData.append('endereco', response.dados.endereco);
-                    
+
                     request.onload = () => {
                         let response = JSON.parse(request.response)
-                        
+
                         let temErro = response.hasOwnProperty('erro') ? response.erro : false
-                        
+
                         if (request.status >= 200 && request.status < 300) {
                             if(temErro){
                                 // o servidor processou a requisição mas ocorreu algum erro durante a processo
@@ -233,7 +229,7 @@ export default {
                     };
 
                     request.send(formData)
-                    
+
                 },
                 remove: (source, load, error) => {
                     // Should somehow send `source` to server so server can remove the file with this source
@@ -250,19 +246,19 @@ export default {
                         }
                     }
 
-                    this.server.revert(dados,load,error)
+                    if(this.ativarHttp){
+                        this.server.revert(dados,load,error)
+                    }
+                    else {
+                        load()
+                    }
+
                 }
             },
 
         };
     },
     methods: {
-        arquivoAtualizado(files) {
-            // let removeButtons = this.$el.getElementsByClassName('filepond--file-action-button filepond--action-remove-item')
-            
-            for (const file of files) {      
-            }
-        },
         getVModelRespostaPadrao(erro, nomeinterno, caminho_completo, key, acao){
             return {
                 erro: erro||false,
@@ -284,7 +280,6 @@ export default {
             }
             else if(origem=='revert'){
                 key = responseJson.filepond.key
-                delete this.vModel[key];
                 this.$set(this.vModel, key, null)
             }
             else if(origem=='load'){
@@ -298,34 +293,30 @@ export default {
                 Object.assign(responseJson, respostaPadrao)
                 responseJson.serverError = false
 
-                this.$set(this.vModel, key, obj)                
+                this.$set(this.vModel, key, obj)
             }
 
             this.emitVModel();
         },
         emitVModel(){
-            
+
             let vmodel = this.vModel
-            
+
             if( ! this.$refs.pond.allowMultiple){
                 let index = Object.keys(vmodel).pop();
                 vmodel = vmodel[index];
             }
-            
+
             this.$emit('input', vmodel)
         }
     },
-    mounted(){
-        
-    },
-
 };
 </script>
 
 <style>
-    .filepond--drop-label label, .filepond--file-action-button {
-        cursor: pointer;
-    }
+.filepond--drop-label label, .filepond--file-action-button {
+    cursor: pointer;
+}
 
 
 /* the background color of the file and file panel (used when dropping an image) */
@@ -339,7 +330,7 @@ export default {
 }
 
 /* error state color */
-[data-filepond-item-state*=error] .filepond--item-panel, 
+[data-filepond-item-state*=error] .filepond--item-panel,
 [data-filepond-item-state*=invalid] .filepond--item-panel {
     background-color: #c44e47 !important;
 }
