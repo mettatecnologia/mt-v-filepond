@@ -258,6 +258,11 @@ export default {
 
         };
     },
+    watch:{
+        value(v){
+            if(! v) this.vModel = {}
+        }
+    },
     methods: {
         getVModelRespostaPadrao(erro, nomeinterno, caminho_completo, key, acao){
             return {
