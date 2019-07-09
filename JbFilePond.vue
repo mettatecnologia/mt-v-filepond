@@ -23,7 +23,7 @@
         :label-tap-to-retry="labelTapToRetry"
         :label-file-waiting-for-size="labelFileWaitingForSize"
 
-        :allow-file-type-validation="tiposArquivos.length > 0"
+        :allow-file-type-validation="this.tiposArquivos && this.tiposArquivos.length > 0"
         :accepted-file-types="tiposArquivos"
         file-validate-type-label-expected-types="Tente: {allButLastType} ou {lastType}"
 
