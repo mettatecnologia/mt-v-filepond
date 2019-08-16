@@ -110,7 +110,7 @@ export default {
 
                     request.onload = () => {
                         let response = JSON.parse(request.response)
-                        let temErro = response.hasOwnProperty('erro') ? response.erro : false
+                        let temErro = {}.hasOwnProperty.call(response, 'erro') ? response.erro : false
 
                         if (request.status >= 200 && request.status < 300) {
                             // the load method accepts either a string (id) or an object
@@ -208,7 +208,7 @@ export default {
                     request.onload = () => {
                         let response = JSON.parse(request.response)
 
-                        let temErro = response.hasOwnProperty('erro') ? response.erro : false
+                        let temErro = {}.hasOwnProperty.call(response, 'erro') ? response.erro : false
 
                         if (request.status >= 200 && request.status < 300) {
                             if(temErro){
